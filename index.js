@@ -29,6 +29,17 @@ checked: true},
 
 function renderShoppingList(){
   //render shopping list in the DOM 
+
+  //Where should the shopping list be rendered? Our jQuery code will need to target the .js-shopping-list element, inserting <li>s inside
+
+  //STEPS:
+  //1.For each item in storeItems, generate a string representing an <li> with: 
+    //-the item name rendered as inner text 
+    //- the item's index in the array set as a data attribute (hidden to users)
+    //-the item's checked state (true or false) toggling the class ".shopping0item__checked"
+  //2. Join together the individual item strings into one long string
+  //3. Insert this long string inside the ul in the DOM 
+
   console.log('renderShoppingList ran'); 
 }
 
