@@ -40,8 +40,39 @@ function renderShoppingList(){
   //2. Join together the individual item strings into one long string
   //3. Insert this long string inside the ul in the DOM 
 
+  const shoppingListItemsString = generateShoppingItemsString(storeItems);
+
+  // insert that HTML into the DOM
+  $('.js-shopping-list').html(shoppingListItemsString);
   console.log('renderShoppingList ran'); 
 }
+
+function generateShoppingItemsString(storeItems) {
+
+  //we need to generate a string
+  //to generate we'll need to iterate over each item in storeItem
+  //generate an <li> string with the proper text and class to 
+  //reflect the properties of the item
+  //loop over storeItems using .map 
+  //calling a new function on each one generateItemElement which 
+  //will generate the item string
+  //we want join the individual items string into one big one to 
+  //be retruned within this function
+
+  console.log("Generating shopping list element");
+
+  const items = shoppingList.map((item, index) => generateItemElement(item, index));
+  
+  return items.join("");
+
+}
+
+function generateItemElement(item, index, template) {
+
+//returns a single <li> element that gets sent into generateShoppingItemsString
+//this just display the item name
+};
+
 
 function handleNewItemSubmit(){
   //will be responsibile for users adding new items 
@@ -66,6 +97,7 @@ function handleShoppingList(){
   handleNewItemSubmit();
   handleItemCheckClicked();
   handleDeleteItemClicked();
+  generateShoppingItemsString();
 }
 
 $(handleShoppingList());
