@@ -29,11 +29,22 @@ function renderShoppingList(){
     //call a function that filters the array
     filteredItems = filterListItems(filteredItems);
   }
+
+  if(STORE.searchTerm!==null){
+    //if there's a search term, filter the page to see that 
+    filteredItems = filterBySearch(filteredItems);
+    console.log(filteredItems);
+  }
   //  Call the function that generates a long string off all the items 
   const shoppingListItemsString = generateShoppingItemsString(filteredItems);
 
   //Insert this long string inside the ul html in the DOM 
   $('.js-shopping-list').html(shoppingListItemsString);
+}
+
+//Filter by the search
+function filterBySearch(filteredItems){
+  return filteredItems.filter((item)=>STORE.searchTerm===item.name);
 }
 
 //Filter the list items in the object to only those that are unchecked
@@ -67,7 +78,8 @@ function generateItemElement(item) {
 //Shopping List needs to be able to add items 
 function handleNewItemSubmit(){
   //Have an event listener listen to when user adds and submits form 
-  $('form').submit(event=>{
+  $('.js-submit-button').click(event=>{
+    console.log('adding item');
     event.preventDefault(); //not working 
     //Get the name of the new item 
     const itemName = $('.js-shopping-list-entry').val();
@@ -165,6 +177,42 @@ function toggleHideChecked(){
   STORE.hideChecked=(!STORE.hideChecked);
 }
 
+function  handleSearchItemSubmit(){
+  
+  //listen for when user submits form 
+  $('.js-search-button').click(event=>{
+
+    event.preventDefault();
+
+    //grab the value in the input text area 
+    const searchItem = $('.js-toggle-search').val();
+
+    //set text to blank
+    $('.js-toggle-search').val('');
+
+    //change searchTerm from null to whatever the term is 
+    STORE.searchTerm = searchItem; 
+
+    //re-render page with filtered items (figure out )
+    renderShoppingList();
+
+  });
+
+}
+
+function handleCancelSearchSubmit(){
+  //listen for when button is clicked
+  $('.js-cancel-search-button').click(event=>{
+    //prevent default
+    event.preventDefault();
+
+    //change the searchTerm to null
+    STORE.searchTerm = null;
+    //re-render
+    renderShoppingList();
+  });
+}
+
 function handleShoppingList(){
   //this will be our callback function when the page loads 
   // will initially render the shopping list and activate individual functions
@@ -173,6 +221,8 @@ function handleShoppingList(){
   handleItemCheckClicked();
   handleDeleteItemClicked();
   handleHideCheckedItems();
+  handleSearchItemSubmit();
+  handleCancelSearchSubmit();
 }
 
 $(handleShoppingList());
