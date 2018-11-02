@@ -17,13 +17,10 @@
 //we're pre-adding items to the shopping list so there's
 //something to see when it loads
 const storeItems = [
-
-{name: "apple",
-checked: true},
-{name: "banana",
-checked: true},
-
-
+  {name: 'apple',
+    checked: true},
+  {name: 'banana',
+    checked: true},
 ];
 
 
@@ -34,9 +31,9 @@ function renderShoppingList(){
 
   //STEPS:
   //1.For each item in storeItems, generate a string representing an <li> with: 
-    //-the item name rendered as inner text 
-    //- the item's index in the array set as a data attribute (hidden to users)
-    //-the item's checked state (true or false) toggling the class ".shopping0item__checked"
+  //-the item name rendered as inner text 
+  //- the item's index in the array set as a data attribute (hidden to users)
+  //-the item's checked state (true or false) toggling the class ".shopping0item__checked"
   //2. Join together the individual item strings into one long string
   //3. Insert this long string inside the ul in the DOM 
 
@@ -59,11 +56,11 @@ function generateShoppingItemsString(storeItems) {
   //we want join the individual items string into one big one to 
   //be retruned within this function
 
-  console.log("Generating shopping list element");
+  console.log('Generating shopping list element');
 
-  const items = shoppingList.map((item, index) => generateItemElement(item, index));
+  const items = storeItems.map((item, index) => generateItemElement(item, index));
   
-  return items.join("");
+  return items.join('');
 
 }
 
@@ -71,7 +68,10 @@ function generateItemElement(item, index, template) {
 
 //returns a single <li> element that gets sent into generateShoppingItemsString
 //this just display the item name
-};
+
+return `
+<li>${item.name}</li>`;
+}
 
 
 function handleNewItemSubmit(){
@@ -94,10 +94,10 @@ function handleShoppingList(){
   // will initially render the shopping list and activate individual functions
   console.log('handleShoppingList ran');
   renderShoppingList();
-  handleNewItemSubmit();
-  handleItemCheckClicked();
-  handleDeleteItemClicked();
-  generateShoppingItemsString();
+  // handleNewItemSubmit();
+  // handleItemCheckClicked();
+  // handleDeleteItemClicked();
+  // generateShoppingItemsString();
 }
 
 $(handleShoppingList());
