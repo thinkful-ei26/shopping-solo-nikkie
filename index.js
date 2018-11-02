@@ -24,7 +24,7 @@ function renderShoppingList(){
 function generateShoppingItemsString(STORE) {
   const items = STORE.map((item, index) => generateItemElement(item, index));
   return items.join('');
-  //QUESTION: how does it know what the index is? 
+  //QUESTION: how does it know what the index is? map inherently accesses item then index
 }
 
 //Generates and returns a string representing an <li> item with the item name as inner text, the item's index as a data attributed, and the item's checked state as a class being toggled
@@ -46,13 +46,13 @@ function generateItemElement(item, index) {
 //Shopping List needs to be able to add items 
 function handleNewItemSubmit(){
   //Have an event listener listen to when user adds and submits form 
-  $('form').submit(event=>{
+  $('.js-shopping-list-form').submit(event=>{
     event.preventDefault();
     //Get the name of the new item 
     const itemName = $('.js-shopping-list-entry').val();
     //Clear the text area for next potential input
     $('.js-shopping-list-entry').val('');
-    //Create a new object representing the added item and add to STORE
+    //Call a function that creates a new object representing the added item and adds it to STORE
     addItemToShoppingList(itemName);
     //Render the page again 
     renderShoppingList();
@@ -65,6 +65,26 @@ function addItemToShoppingList(itemName){
 
 //Shopping List needs to be able to check and uncheck items
 function handleItemCheckClicked(){
+  //Have an event listener that listens if user clicks check button (remember event delegation bc these buttons dont exist when page first loads)
+  $('.js-shopping-list').on('click', '.js-item-toggle', event =>{
+    //Call a function that retrieves the item's index in STORE from the data attribute 
+    const itemIndex = getItemIndex(event.target);
+    //Call a function that toggles the checked property for the item at that index in STORE.
+    toggleCheckedForListItem(itemIndex);
+    //Re-render page
+    renderShoppingList();
+  });
+}
+
+//Retrieves the item's index in STORE from the data attribute 
+function getItemIndex(item){
+  //The index is a string, so we get it as a string and then return it as an int 
+  return parseInt($(item).closest('.js-item-index-element').data('item-index'));
+}
+
+//toggles the checked property for the item at that index in STORE.
+function toggleCheckedForListItem(itemIndex){
+  STORE[itemIndex].checked = !STORE[itemIndex].checked;
 }
 
 //Shopping List needs to be able to delete items
