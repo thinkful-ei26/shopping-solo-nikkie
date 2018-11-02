@@ -10,7 +10,6 @@ const STORE = [
   {name: 'bread', checked: false}
 ];
 
-
 //Shopping List (list of <li>s) needs to get rendered to the ul element (.js-shopping-list element):
 function renderShoppingList(){
 //  Call the function that generates a long string off all the items 
@@ -45,9 +44,11 @@ function generateItemElement(item, index) {
 
 //Shopping List needs to be able to add items 
 function handleNewItemSubmit(){
+  console.log('handling new items fn running');
   //Have an event listener listen to when user adds and submits form 
-  $('.js-shopping-list-form').submit(event=>{
-    event.preventDefault();
+  $('form').submit(event=>{
+    console.log('add item event listener triggered');
+    event.preventDefault(); //not working 
     //Get the name of the new item 
     const itemName = $('.js-shopping-list-entry').val();
     //Clear the text area for next potential input
@@ -89,6 +90,24 @@ function toggleCheckedForListItem(itemIndex){
 
 //Shopping List needs to be able to delete items
 function handleDeleteItemClicked(){
+  //Listen for when delete button is click (again, remember event delegation)
+  $('.js-shopping-list').on('click', '.js-item-delete', event =>{
+    //Call function that returns index of which item was clicked 
+    const itemIndex = getItemIndex(event.target);
+    //QUESTION: currentTarget vs target vs this
+
+    //Call function that deletes that item with said index from the STORE array
+    deleteItem(itemIndex);
+
+    //Re-render 
+    renderShoppingList();
+
+  });
+}
+
+// deletes item with said index from the STORE array
+function deleteItem(itemIndex){
+  STORE.splice(itemIndex,1);
 }
 
 function handleShoppingList(){
