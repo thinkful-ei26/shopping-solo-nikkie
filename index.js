@@ -1,6 +1,32 @@
 'use strict'; 
 /*eslint-env jquery*/
 
+//Shopping List needs to get rendered to the page
+//Shopping List needs to be able to add items 
+//Shopping List needs to be able to check items
+//Shopping List needs to be able to delete items
+
+
+//storeItems is responsible for storing the underlying data
+//that our app will need to keep track of in order to work
+
+//we have an array of shopping list items, each one is an object
+//with a `name` and a `checked` property that will indicate 
+//whether it is checked off or not
+
+//we're pre-adding items to the shopping list so there's
+//something to see when it loads
+const storeItems = [
+
+{name: "apple",
+checked: true},
+{name: "banana",
+checked: true},
+
+
+];
+
+
 function renderShoppingList(){
   //render shopping list in the DOM 
   console.log('renderShoppingList ran'); 
