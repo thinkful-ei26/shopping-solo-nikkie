@@ -10,7 +10,7 @@
 //we should give it a unique ID bc the indexes are changing throughout 
 const STORE = {
   items: [ 
-    //  {name: 'apples', checked: false, id: ''},
+    //  {name: 'apples', checked: false, id: '', edit: false},
     // {name: 'oranges', checked: false},
     // {name: 'milk', checked: true},
     // {name: 'bread', checked: false}
@@ -33,7 +33,6 @@ function renderShoppingList(){
   if(STORE.searchTerm!==null){
     //if there's a search term, filter the page to see that 
     filteredItems = filterBySearch(filteredItems);
-    console.log(filteredItems);
   }
   //  Call the function that generates a long string off all the items 
   const shoppingListItemsString = generateShoppingItemsString(filteredItems);
@@ -61,6 +60,7 @@ function generateShoppingItemsString(storeItems) {
 
 //Generates and returns a string representing an <li> item with the item name as inner text, the item's uniqueID as a data attributed, and the item's checked state as a class being toggled
 function generateItemElement(item) {
+  //see if it's in editing mode, and if it is then return a string with a form, with save and cancel 
   return  `
   <li class="js-item-index-element" data-item-unique="${item.id}">
     <span class="shopping-item js-shopping-item ${item.checked ? 'shopping-item__checked' : ''}">${item.name}</span>
@@ -163,7 +163,6 @@ function getItem(uniqueID){
 function handleHideCheckedItems(){
   //Have an event listener on the checkbox 
   $('.js-toggle-hide').click(event=>{
-    console.log('checked');
     //When event is triggered, update the hideChecked property in the STORE object 
     toggleHideChecked();
     //Re-render with filtered objects
@@ -213,6 +212,32 @@ function handleCancelSearchSubmit(){
   });
 }
 
+function handleNameEdit(){
+
+  //listen for when user hits the name to edit and make it editable (use event delegation)
+  $('.js-shopping-list').on('click', '.js-shopping-item', event =>{
+    //logic doesnt really work, especially when I comment out bottom line
+    $(event.target).attr('contentEditable',true); 
+    console.log(event.target);
+    //find out which item they edited
+    const itemName = $(event.target).text();
+    console.log(itemName);
+    const itemID = getItemUniqueID(event.target);
+    const index = getItemIndex(itemID);
+
+    // //update that in the DOM 
+    STORE.items[index].name = itemName;
+    console.log(STORE);
+    // //re-render
+    renderShoppingList();
+  });
+
+  //grab what they input and update it in the array with it's ID 
+
+  //re-render 
+
+}
+
 function handleShoppingList(){
   //this will be our callback function when the page loads 
   // will initially render the shopping list and activate individual functions
@@ -223,7 +248,11 @@ function handleShoppingList(){
   handleHideCheckedItems();
   handleSearchItemSubmit();
   handleCancelSearchSubmit();
+  // handleNameEdit();
 }
 
 $(handleShoppingList());
 
+//make an alternate state depending on whether or not user is in edit mode 
+//if they click edit, it makes a form 
+//Make sure you're not editing STORE in any of the rendering functions 
