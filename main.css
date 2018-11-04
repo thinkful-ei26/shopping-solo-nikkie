@@ -32,7 +32,7 @@ button:hover {
   padding-left: 0;
 }
 
-.shopping-list > li {
+.js-item-index-element{
   margin-bottom: 20px;
   border: 1px solid grey;
   padding: 20px;

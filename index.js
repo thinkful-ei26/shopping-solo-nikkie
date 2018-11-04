@@ -2,49 +2,82 @@
 /*eslint-env jquery, global cuid*/
 /*global cuid*/
 
-//organize: put handling functions, then DOM manipulation functions, then helper functions 
-
-//STORE keeps the underlying data that our app will need to keep track of. Made up of objects with name and checked property (bool)
-//We're pre-adding items to the list so they're there when it loads (when finished, dont do that)
-
-//we need a data type to remember the other states of the page as well, such as whether or not the checkbox is clicked, etc. So we'll make an object 
 
 //we should give it a unique ID bc the indexes are changing throughout 
+//STORE is an object keeps the underlying data that our app will need to keep track of. Made up of an array of items(with name, unique id, checked and edit bool), a hideChecked bool set to false, and a searchTerm set to null
 const STORE = {
   items: [],
   hideChecked: false,
   searchTerm: null
 };
 
-//Shopping List (list of <li>s) needs to get rendered to the ul element (.js-shopping-list element):
+//********************    FUNCTIONS THAT UPDATE STORE    ********************
+
+//Create a new object representing the added item and push it to STORE
+function addItemToShoppingList(itemName){
+  STORE.items.push({name: itemName, checked: false, id: cuid(), edit:false});
+}
+
+//toggles the checked property for the item with the given unique ID (QUESTION: item is a reference to the global?)
+function toggleCheckedForListItem(item){
+  item.checked = !item.checked;
+}
+
+// deletes item from the STORE array
+function deleteItem(item){
+  //using the ID, find the current index. Then delete item at that index from STORE
+  STORE.items.splice(getItemIndex(item),1);
+}
+
+//toggles the hidechecked property in the STORE 
+function toggleHideChecked(){
+  STORE.hideChecked=(!STORE.hideChecked);
+}
+
+//changes the searchTerm in STORE to whatever is being searched
+function changeSearchTerm(searchItem){
+  STORE.searchTerm = searchItem; 
+}
+
+function toggleEditForItem(item){
+  //toggles the edit value for item in the STORE
+  item.edit = !item.edit;
+}
+
+function changeName(item, newName){
+  item['name'] = newName;
+}
+
+//********************    DOM MANIPULATION    ********************
+
+//Shopping List (list of all the <li>s) needs to get rendered to the ul element (.js-shopping-list element):
 function renderShoppingList(){
-  console.log('in render');
-
-  //make a copy of the STORE obj so we can filter it if necassary 
+  //make a copy of the items in the STORE so we can filter it if necassary 
   let filteredItems = [...STORE.items];
-  console.log(filteredItems);
-
+  //check if STORE's hidechecked property is true
   if(STORE.hideChecked){
-    //call a function that filters the array
-    filteredItems = filterListItems(filteredItems);
+    //call a helper function that filters the array
+    filteredItems = filterByUnchecked(filteredItems);
   }
-
+  //check if STORE's searchTerm is equal to anything
   if(STORE.searchTerm!==null){
-    //if there's a search term, filter the page to see that 
+    //if there's a search term, call a helper function to filter it by the term 
     filteredItems = filterBySearch(filteredItems);
   }
-  //call a fn that updates the output counter 
+  //call a helper function that updates the output counter 
   updateCounter(filteredItems);
-  //  Call the function that generates a long string off all the items 
+  //  Call a helper function that generates a long string off all the items 
   const shoppingListItemsString = generateShoppingItemsString(filteredItems);
-
   //Insert this long string inside the ul html in the DOM 
   $('.js-shopping-list').html(shoppingListItemsString);
 }
 
+//Changes the text of the output based on what the length of filteredItems is
 function updateCounter(filteredItems){
   $('.js-list-count').html(`${filteredItems.length} items`);
 }
+
+//********************    HELPER FUNCTIONS    ********************
 
 //Filter by the search - if the search term is anywhere in the word, return it 
 function filterBySearch(filteredItems){
@@ -56,37 +89,28 @@ function filterBySearch(filteredItems){
     }
   });
   return filteredArr;
-  // return filteredItems.filter((item)=>STORE.searchTerm===item.name);
 }
 
 //Filter the list items in the object to only those that are unchecked
-function filterListItems(filteredItems){
+function filterByUnchecked(filteredItems){
   return filteredItems.filter((item)=>
     !item.checked);
 }
 
 //Generate and return a string of all the <li>s by looping over each item with map and calling a function on each of them to generate the item string  
 function generateShoppingItemsString(storeItems) {
-  console.log('in generateshoppingliststring');
-  console.log(storeItems);
   const items = storeItems.map((item) =>{ 
-    console.log('in map');
-    console.log(item);
     return generateItemElement(item);
   });
   return items.join('');
 }
 
-//Generates and returns a string representing an <li> item with the item name as inner text, the item's uniqueID as a data attributed, and the item's checked state as a class being toggled
+//Generates and returns a string representing an <li> item with the item name as inner text, the item's uniqueID as a data attribute, and the item's checked state as a class being toggled
 function generateItemElement(item) {
-  //see if it's in editing mode, and if it is then return a string with a form, with save and cancel
-  console.log('in generateitemelemnt fn');
-  console.log(item);
-  console.log(item.edit);
-  console.log(item['name']);
+  //see if the item is in editing mode, and if it is then return a string with a form, with save and cancel (different mode)
   if(item.edit===true){
     return `
-    <li class="js-item-index-element" data-item-unique="${item.id}">
+    <form id="js-shopping-list-form"> <li class="js-item-index-element" data-item-unique="${item.id}">
       <input class="shopping-item js-shopping-item-edit ${item.checked ? 'shopping-item__checked' : ''}" value = "${item['name']}"></input>
       <div class="shopping-item-controls">
         <button class="shopping-item-save js-item-save" type = "submit">
@@ -96,8 +120,9 @@ function generateItemElement(item) {
             <span class="button-label">cancel</span>
         </button>
       </div>
-    </li>`;
+    </li> </form>`;
   }
+  //if it's not in editiing mode, just return the basic item look
   return  `
   <li class="js-item-index-element" data-item-unique="${item.id}">
     <span class="shopping-item js-shopping-item ${item.checked ? 'shopping-item__checked' : ''}">${item['name']}</span>
@@ -115,11 +140,29 @@ function generateItemElement(item) {
   </li>`;
 }
 
-//Shopping List needs to be able to add items 
+//Retrieves the item's unique ID in STORE from the data attribute given some event.target
+function getItemUniqueID(target){
+  return $(target).closest('.js-item-index-element').data('item-unique');
+}
+
+//Retrieves the item's index in STORE given the item
+function getItemIndex(item){
+  return STORE.items.indexOf(item);
+}
+
+//returns a reference to the item in the global STORE
+function getItem(uniqueID){
+  return STORE.items.find((item)=>item.id===uniqueID);
+}
+
+// ********************    EVENT HANDLING FUNCTIONS   ********************
+
+//Handles adding new items
 function handleNewItemSubmit(){
   //Have an event listener listen to when user adds and submits form 
   $('.js-submit-button').click(event=>{
-    event.preventDefault(); //not working 
+    //prevent the default (this is a submit button)
+    event.preventDefault();
     //Get the name of the new item 
     const itemName = $('.js-shopping-list-entry').val();
     //Clear the text area for next potential input
@@ -130,123 +173,71 @@ function handleNewItemSubmit(){
     renderShoppingList();
   });
 }
-//Create a new object representing the added item and add to STORE
-function addItemToShoppingList(itemName){
-  STORE.items.push({name: itemName, checked: false, id: cuid(), edit:false});
-}
 
-//Shopping List needs to be able to check and uncheck items
+//Handles the checking/unchecking of an item
 function handleItemCheckClicked(){
   //Have an event listener that listens if user clicks check button (remember event delegation bc these buttons dont exist when page first loads)
   $('.js-shopping-list').on('click', '.js-item-toggle', function (event){
     //Call a function that retrieves the item's uniqueID in STORE from the data attribute 
     const uniqueID = getItemUniqueID(event.target);
+    //Find the item using this IID 
     const item = getItem(uniqueID);
-    
-    // console.log(event.target);
-    // console.log(event.currentTarget);
-    // console.log(this);
-
-    //target points to exactly what in the button we clicked - so that could be span
-    //currentTarget is the button itself/what we put the event listener on (and keyword this is usually the same as currentTarget)
-
-    //Call a function that toggles the checked property for the item with given uniqueID.
+    //Call a function that toggles the checked property for the item
     toggleCheckedForListItem(item);
     //Re-render page
     renderShoppingList();
   });
 }
 
-//Retrieves the item's unique ID in STORE from the data attribute given some event.target
-function getItemUniqueID(target){
-  return $(target).closest('.js-item-index-element').data('item-unique');
-}
-
-//toggles the checked property for the item with the given unique ID 
-function toggleCheckedForListItem(item){
-  item.checked = !item.checked;
-}
-
-//Shopping List needs to be able to delete items
+//Handles deleting items
 function handleDeleteItemClicked(){
   //Listen for when delete button is click (again, remember event delegation)
   $('.js-shopping-list').on('click', '.js-item-delete', event =>{
     //Call function that returns uniqueID of which item was clicked 
     const uniqueID = getItemUniqueID(event.target);
-    //QUESTION: currentTarget vs target vs this
-
+    const item = getItem(uniqueID);
     //Call function that deletes that item with said uniqueID from the STORE array
-    deleteItem(uniqueID);
-
+    deleteItem(item);
     //Re-render 
     renderShoppingList();
-
   });
 }
 
-// deletes item with said uniqueID from the STORE array
-function deleteItem(uniqueID){
-  //using the ID, find the current index. Then delete at that index 
-  STORE.items.splice(getItemIndex(uniqueID),1);
-}
-
-//Retrieves the item's index in STORE given the unique ID
-function getItemIndex(uniqueID){
-  return STORE.items.indexOf(getItem(uniqueID));
-}
-
-//returns a reference to the item in the global STORE
-function getItem(uniqueID){
-  return STORE.items.find((item)=>item.id===uniqueID);
-}
-
+//Handles checking/unchecking the hide items checkbox
 function handleHideCheckedItems(){
   //Have an event listener on the checkbox 
   $('.js-toggle-hide').click(event=>{
-    //When event is triggered, update the hideChecked property in the STORE object 
+    //When event is triggered, toggle the hideChecked property in the STORE object 
     toggleHideChecked();
-    //Re-render with filtered objects
+    //Re-render (with filtered objects)
     renderShoppingList();
   });
-
 }
 
-//toggles the hidechecked property in the STORE 
-function toggleHideChecked(){
-  STORE.hideChecked=(!STORE.hideChecked);
-}
-
+//handles trying to search for a specific item
 function  handleSearchItemSubmit(){
-  
-  //listen for when user submits form 
+  //listen for when user submits form to search
   $('.js-search-button').click(event=>{
-
+    //since it's a submit button, prevent default
     event.preventDefault();
-
     //grab the value in the input text area 
     const searchItem = $('.js-toggle-search').val();
-
     //set text to blank
     $('.js-toggle-search').val('');
-
-    //change searchTerm from null to whatever the term is 
-    STORE.searchTerm = searchItem; 
-
-    //re-render page with filtered items (figure out )
+    //change searchTerm in STORE from null to whatever the term is 
+    changeSearchTerm(searchItem);
+    //re-render page
     renderShoppingList();
-
   });
-
 }
 
-function handleCancelSearchSubmit(){
-  //listen for when button is clicked
+function handleGoBackToList(){
+  //listen for when button is clicked to go back to original list/cancel search
   $('.js-cancel-search-button').click(event=>{
-    //prevent default
+    //prevent default (still a button!)
     event.preventDefault();
-
     //change the searchTerm to null
-    STORE.searchTerm = null;
+    changeSearchTerm(null);
     //re-render
     renderShoppingList();
   });
@@ -255,58 +246,39 @@ function handleCancelSearchSubmit(){
 function handleNameEdit(){
   //listen for when user hits edit button
   $('.js-shopping-list').on('click', '.js-item-edit', event =>{
-  //find out which element they hit edit for and change its edit mode to true
-    console.log('in handlenameedit');  
-
-
+  //find out which element they hit edit for
     const uniqueID = getItemUniqueID(event.target);
     const item = getItem(uniqueID);
+    //toggle the edit mode for this item
     toggleEditForItem(item);
-
-
-    //re-render (in there it'll call generateItemElement which will return a different looking element box)
+    //re-render (in there it'll call generateItemElement which will return a different looking element box thats in edit mode)
     renderShoppingList();
   });
-
-}
-
-function toggleEditForItem(item){
-  //toggles the edit value for item in the STORE
-  console.log('in toggleeditfn');
-  item.edit = !item.edit;
-  // STORE.items[itemIndex].edit = !STORE.items[itemIndex].edit;
 }
 
 function handleSaveNameEdit(){
   //listen for when save is clicked
   $('.js-shopping-list').on('click', '.js-item-save', event =>{
-    console.log('in save');
-    //prevent default 
+    //prevent default (save is submit btn in form)
     event.preventDefault();
-    //grab whatever the val in input is 
+    //grab whatever the new name val in input is 
     const newName = $('.js-shopping-item-edit').val();
-    //set the name of the item they edited to that val (find which item, edit it)
+    //find out which item they're editing 
     const uniqueID = getItemUniqueID(event.target);
     const item = getItem(uniqueID);
+    //change the name of the item they edited to the new val 
     changeName(item, newName);
-    //toggle edit
+    //toggle edit for the item
     toggleEditForItem(item);
     //render 
     renderShoppingList();
   });
-
-}
-
-function changeName(item, newName){
-  console.log('in changename');
-  console.log(newName);
-  item['name'] = newName;
 }
 
 function handleCancelNameEdit(){
   //listen for when cancel button is clicked 
   $('.js-shopping-list').on('click', '.js-item-cancel', event =>{
-    //find item 
+    //find the item 
     const uniqueID = getItemUniqueID(event.target);
     const item = getItem(uniqueID);
 
@@ -319,22 +291,17 @@ function handleCancelNameEdit(){
 }
 
 function handleShoppingList(){
-  //this will be our callback function when the page loads 
-  // will initially render the shopping list and activate individual functions
+  //this will be our callback function when the page loads which will activate all the individual handler functions and initially render the page 
   renderShoppingList();
   handleNewItemSubmit();
   handleItemCheckClicked();
   handleDeleteItemClicked();
   handleHideCheckedItems();
   handleSearchItemSubmit();
-  handleCancelSearchSubmit();
+  handleGoBackToList();
   handleNameEdit();
   handleSaveNameEdit();
   handleCancelNameEdit();
 }
 
 $(handleShoppingList());
-
-//make an alternate state depending on whether or not user is in edit mode 
-//if they click edit, it makes a form 
-//Make sure you're not editing STORE in any of the rendering functions 
