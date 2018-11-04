@@ -125,11 +125,14 @@ function generateShoppingItemsString(storeItems) {
 
 //Generates and returns a string representing an <li> item with the item name as inner text, the item's uniqueID as a data attribute, and the item's checked state as a class being toggled
 function generateItemElement(item) {
+  //see if check is clicked to toggle the class name and button name
+  const checkButton = item.checked ? 'uncheck' : 'check';
+  const checkedClass = item.checked ? 'shopping-item__checked' : '';
   //see if the item is in editing mode, and if it is then return a string with a form, with save and cancel (different mode)
   if(item.edit===true){
     return `
     <form id="js-shopping-list-form"> <li class="js-item-index-element" data-item-unique="${item.id}">
-      <input class="shopping-item js-shopping-item-edit ${item.checked ? 'shopping-item__checked' : ''}" value = "${item['name']}"></input>
+      <input class="shopping-item js-shopping-item-edit ${checkedClass}" value = "${item['name']}"></input>
       <div class="shopping-item-controls">
         <button class="shopping-item-save js-item-save" type = "submit">
             <span class="button-label">save</span>
@@ -146,7 +149,7 @@ function generateItemElement(item) {
     <span class="shopping-item js-shopping-item ${item.checked ? 'shopping-item__checked' : ''}">${item['name']}</span>
     <div class="shopping-item-controls">
       <button class="shopping-item-toggle js-item-toggle">
-          <span class="button-label">check</span>
+          <span class="button-label">${checkButton}</span>
       </button>
       <button class="shopping-item-delete js-item-delete">
           <span class="button-label">delete</span>
@@ -323,5 +326,3 @@ function handleShoppingList(){
 }
 
 $(handleShoppingList());
-
-//functionality to add: when it's in edit mode shouldn't have css strikethrough. Toggle the button to say check vs uncheck 
