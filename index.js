@@ -335,7 +335,7 @@ function handleShoppingList(){
   handleHideCheckedItems();
   // handleSearchItemSubmit();
   handleSearchWhileTyping();
-  // handleGoBackToList();
+  handleGoBackToList();
   handleNameEdit();
   handleSaveNameEdit();
   handleCancelNameEdit();
