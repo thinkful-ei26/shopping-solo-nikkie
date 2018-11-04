@@ -297,7 +297,18 @@ function changeName(item, newName){
 }
 
 function handleCancelNameEdit(){
+  //listen for when cancel button is clicked 
+  $('.js-shopping-list').on('click', '.js-item-cancel', event =>{
+    //find item 
+    const uniqueID = getItemUniqueID(event.target);
+    const item = getItem(uniqueID);
 
+    //toggle edit for that item 
+    toggleEditForItem(item);
+
+    //render
+    renderShoppingList();
+  });
 }
 
 function handleShoppingList(){
