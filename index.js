@@ -41,9 +41,17 @@ function renderShoppingList(){
   $('.js-shopping-list').html(shoppingListItemsString);
 }
 
-//Filter by the search
+//Filter by the search - if the search term is anywhere in the word, return it 
 function filterBySearch(filteredItems){
-  return filteredItems.filter((item)=>STORE.searchTerm===item.name);
+  //function returns new array with words that match given word in any way
+  const filteredArr = [];
+  filteredItems.forEach((item)=>{
+    if(item.name.includes(STORE.searchTerm) ){
+      filteredArr.push(item);
+    }
+  });
+  return filteredArr;
+  // return filteredItems.filter((item)=>STORE.searchTerm===item.name);
 }
 
 //Filter the list items in the object to only those that are unchecked
