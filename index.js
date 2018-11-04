@@ -9,21 +9,18 @@
 
 //we should give it a unique ID bc the indexes are changing throughout 
 const STORE = {
-  items: [ 
-    //  {name: 'apples', checked: false, id: '', edit: false},
-    // {name: 'oranges', checked: false},
-    // {name: 'milk', checked: true},
-    // {name: 'bread', checked: false}
-  ],
+  items: [],
   hideChecked: false,
   searchTerm: null
 };
 
 //Shopping List (list of <li>s) needs to get rendered to the ul element (.js-shopping-list element):
 function renderShoppingList(){
-  console.log(STORE);
+  console.log('in render');
+
   //make a copy of the STORE obj so we can filter it if necassary 
   let filteredItems = [...STORE.items];
+  console.log(filteredItems);
 
   if(STORE.hideChecked){
     //call a function that filters the array
@@ -46,7 +43,7 @@ function filterBySearch(filteredItems){
   //function returns new array with words that match given word in any way
   const filteredArr = [];
   filteredItems.forEach((item)=>{
-    if(item.name.includes(STORE.searchTerm) ){
+    if(item['name'].includes(STORE.searchTerm) ){
       filteredArr.push(item);
     }
   });
@@ -62,22 +59,51 @@ function filterListItems(filteredItems){
 
 //Generate and return a string of all the <li>s by looping over each item with map and calling a function on each of them to generate the item string  
 function generateShoppingItemsString(storeItems) {
-  const items = storeItems.map((item) => generateItemElement(item));
+  console.log('in generateshoppingliststring');
+  console.log(storeItems);
+  //PROBLEM: in storeItems it shows edit = true, but when i print item below it's showing edit=false....
+  const items = storeItems.map((item) =>{ 
+    console.log('in map');
+    console.log(item);
+    return generateItemElement(item);
+  });
   return items.join('');
 }
 
 //Generates and returns a string representing an <li> item with the item name as inner text, the item's uniqueID as a data attributed, and the item's checked state as a class being toggled
 function generateItemElement(item) {
-  //see if it's in editing mode, and if it is then return a string with a form, with save and cancel 
+  //see if it's in editing mode, and if it is then return a string with a form, with save and cancel
+  console.log('in generateitemelemnt fn');
+  //PROBLEM: when this is called, edit is acting weird
+  console.log(item);
+  console.log(item.edit);
+  console.log(item['name']);
+  if(item.edit===true){
+    return `
+    <li class="js-item-index-element" data-item-unique="${item.id}">
+      <input class="shopping-item js-shopping-item-edit ${item.checked ? 'shopping-item__checked' : ''}" value = "${item['name']}"></input>
+      <div class="shopping-item-controls">
+        <button class="shopping-item-save js-item-save" type = "submit">
+            <span class="button-label">save</span>
+        </button>
+        <button class="shopping-item-cancel js-item-cancel">
+            <span class="button-label">cancel</span>
+        </button>
+      </div>
+    </li>`;
+  }
   return  `
   <li class="js-item-index-element" data-item-unique="${item.id}">
-    <span class="shopping-item js-shopping-item ${item.checked ? 'shopping-item__checked' : ''}">${item.name}</span>
+    <span class="shopping-item js-shopping-item ${item.checked ? 'shopping-item__checked' : ''}">${item['name']}</span>
     <div class="shopping-item-controls">
       <button class="shopping-item-toggle js-item-toggle">
           <span class="button-label">check</span>
       </button>
       <button class="shopping-item-delete js-item-delete">
           <span class="button-label">delete</span>
+      </button>
+       <button class="shopping-item-edit js-item-edit">
+          <span class="button-label">edit</span>
       </button>
     </div>
   </li>`;
@@ -87,7 +113,6 @@ function generateItemElement(item) {
 function handleNewItemSubmit(){
   //Have an event listener listen to when user adds and submits form 
   $('.js-submit-button').click(event=>{
-    console.log('adding item');
     event.preventDefault(); //not working 
     //Get the name of the new item 
     const itemName = $('.js-shopping-list-entry').val();
@@ -101,7 +126,7 @@ function handleNewItemSubmit(){
 }
 //Create a new object representing the added item and add to STORE
 function addItemToShoppingList(itemName){
-  STORE.items.push({name: itemName, checked: false, id: cuid()});
+  STORE.items.push({name: itemName, checked: false, id: cuid(), edit:false});
 }
 
 //Shopping List needs to be able to check and uncheck items
@@ -110,6 +135,7 @@ function handleItemCheckClicked(){
   $('.js-shopping-list').on('click', '.js-item-toggle', function (event){
     //Call a function that retrieves the item's uniqueID in STORE from the data attribute 
     const uniqueID = getItemUniqueID(event.target);
+    const item = getItem(uniqueID);
     
     // console.log(event.target);
     // console.log(event.currentTarget);
@@ -119,20 +145,19 @@ function handleItemCheckClicked(){
     //currentTarget is the button itself/what we put the event listener on (and keyword this is usually the same as currentTarget)
 
     //Call a function that toggles the checked property for the item with given uniqueID.
-    toggleCheckedForListItem(uniqueID);
+    toggleCheckedForListItem(item);
     //Re-render page
     renderShoppingList();
   });
 }
 
-//Retrieves the item's unique ID in STORE from the data attribute 
-function getItemUniqueID(item){
-  return $(item).closest('.js-item-index-element').data('item-unique');
+//Retrieves the item's unique ID in STORE from the data attribute given some event.target
+function getItemUniqueID(target){
+  return $(target).closest('.js-item-index-element').data('item-unique');
 }
 
 //toggles the checked property for the item with the given unique ID 
-function toggleCheckedForListItem(uniqueID){
-  const item = getItem(uniqueID);
+function toggleCheckedForListItem(item){
   item.checked = !item.checked;
 }
 
@@ -221,28 +246,57 @@ function handleCancelSearchSubmit(){
 }
 
 function handleNameEdit(){
+  //listen for when user hits edit button
+  $('.js-shopping-list').on('click', '.js-item-edit', event =>{
+  //find out which element they hit edit for and change its edit mode to true
+    console.log('in handlenameedit');  
 
-  //listen for when user hits the name to edit and make it editable (use event delegation)
-  $('.js-shopping-list').on('click', '.js-shopping-item', event =>{
-    //logic doesnt really work, especially when I comment out bottom line
-    $(event.target).attr('contentEditable',true); 
-    console.log(event.target);
-    //find out which item they edited
-    const itemName = $(event.target).text();
-    console.log(itemName);
-    const itemID = getItemUniqueID(event.target);
-    const index = getItemIndex(itemID);
 
-    // //update that in the DOM 
-    STORE.items[index].name = itemName;
-    console.log(STORE);
-    // //re-render
+    const uniqueID = getItemUniqueID(event.target);
+    const item = getItem(uniqueID);
+    toggleEditForItem(item);
+
+
+    //re-render (in there it'll call generateItemElement which will return a different looking element box)
     renderShoppingList();
   });
 
-  //grab what they input and update it in the array with it's ID 
+}
 
-  //re-render 
+function toggleEditForItem(item){
+  //toggles the edit value for item in the STORE
+  console.log('in toggleeditfn');
+  item.edit = !item.edit;
+  // STORE.items[itemIndex].edit = !STORE.items[itemIndex].edit;
+}
+
+function handleSaveNameEdit(){
+  //listen for when save is clicked
+  $('.js-shopping-list').on('click', '.js-item-save', event =>{
+    console.log('in save');
+    //prevent default 
+    event.preventDefault();
+    //grab whatever the val in input is 
+    const newName = $('.js-shopping-item-edit').val();
+    //set the name of the item they edited to that val (find which item, edit it)
+    const uniqueID = getItemUniqueID(event.target);
+    const item = getItem(uniqueID);
+    changeName(item, newName);
+    //toggle edit
+    toggleEditForItem(item);
+    //render 
+    renderShoppingList();
+  });
+
+}
+
+function changeName(item, newName){
+  console.log('in changename');
+  console.log(newName);
+  item['name'] = newName;
+}
+
+function handleCancelNameEdit(){
 
 }
 
@@ -256,7 +310,9 @@ function handleShoppingList(){
   handleHideCheckedItems();
   handleSearchItemSubmit();
   handleCancelSearchSubmit();
-  // handleNameEdit();
+  handleNameEdit();
+  handleSaveNameEdit();
+  handleCancelNameEdit();
 }
 
 $(handleShoppingList());
