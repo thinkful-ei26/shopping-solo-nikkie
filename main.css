@@ -49,3 +49,11 @@ button:hover {
 .shopping-item__checked {
   text-decoration: line-through;
 }
+
+#list-empty-message{
+  display:none;
+}
+
+.js-shopping-item-edit.shopping-item__checked{
+  text-decoration: none;
+}

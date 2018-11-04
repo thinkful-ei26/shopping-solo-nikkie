@@ -54,6 +54,15 @@ function changeName(item, newName){
 function renderShoppingList(){
   //make a copy of the items in the STORE so we can filter it if necassary 
   let filteredItems = [...STORE.items];
+  
+  //if filteredITEMS is empty at this point, that means nothing is in the list. SO then put something on the page that says list is empty :( add something to list - dis
+  if (filteredItems.length===0){
+    listIsEmpty();
+  }
+  //if its not empty, then display should = none for the p, and do everything else
+  else{
+    listIsNotEmpty();
+  }
   //check if STORE's hidechecked property is true
   if(STORE.hideChecked){
     //call a helper function that filters the array
@@ -64,17 +73,26 @@ function renderShoppingList(){
     //if there's a search term, call a helper function to filter it by the term 
     filteredItems = filterBySearch(filteredItems);
   }
-  //call a helper function that updates the output counter 
-  updateCounter(filteredItems);
   //  Call a helper function that generates a long string off all the items 
   const shoppingListItemsString = generateShoppingItemsString(filteredItems);
   //Insert this long string inside the ul html in the DOM 
   $('.js-shopping-list').html(shoppingListItemsString);
+  //call a helper function that updates the output counter 
+  updateCounter(filteredItems);
 }
+
 
 //Changes the text of the output based on what the length of filteredItems is
 function updateCounter(filteredItems){
   $('.js-list-count').html(`${filteredItems.length} items`);
+}
+
+function listIsEmpty(){
+  $('#list-empty-message').css('display','block');
+}
+
+function listIsNotEmpty(){
+  $('#list-empty-message').css('display','none');
 }
 
 //********************    HELPER FUNCTIONS    ********************
@@ -305,3 +323,5 @@ function handleShoppingList(){
 }
 
 $(handleShoppingList());
+
+//functionality to add: when it's in edit mode shouldn't have css strikethrough. Toggle the button to say check vs uncheck 
