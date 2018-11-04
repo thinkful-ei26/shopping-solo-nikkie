@@ -102,7 +102,7 @@ function filterBySearch(filteredItems){
   //function returns new array with words that match given word in any way
   const filteredArr = [];
   filteredItems.forEach((item)=>{
-    if(item['name'].includes(STORE.searchTerm) ){
+    if(item['name'].toLowerCase().includes(STORE.searchTerm.toLowerCase())){
       filteredArr.push(item);
     }
   });
@@ -236,15 +236,30 @@ function handleHideCheckedItems(){
 }
 
 //handles trying to search for a specific item
-function  handleSearchItemSubmit(){
-  //listen for when user submits form to search
-  $('.js-search-button').click(event=>{
-    //since it's a submit button, prevent default
+// function  handleSearchItemSubmit(){
+//   //listen for when user submits form to search
+//   $('.js-search-button').click(event=>{
+//     //since it's a submit button, prevent default
+//     event.preventDefault();
+//     //grab the value in the input text area 
+//     const searchItem = $('.js-toggle-search').val();
+//     //set text to blank
+//     $('.js-toggle-search').val('');
+//     //change searchTerm in STORE from null to whatever the term is 
+//     changeSearchTerm(searchItem);
+//     //re-render page
+//     renderShoppingList();
+//   });
+// }
+
+function  handleSearchWhileTyping(){
+  //listen for when user starts typing in search
+  $('.js-toggle-search').keyup(event=>{
     event.preventDefault();
     //grab the value in the input text area 
     const searchItem = $('.js-toggle-search').val();
     //set text to blank
-    $('.js-toggle-search').val('');
+    // $('.js-toggle-search').val('');
     //change searchTerm in STORE from null to whatever the term is 
     changeSearchTerm(searchItem);
     //re-render page
@@ -318,8 +333,9 @@ function handleShoppingList(){
   handleItemCheckClicked();
   handleDeleteItemClicked();
   handleHideCheckedItems();
-  handleSearchItemSubmit();
-  handleGoBackToList();
+  // handleSearchItemSubmit();
+  handleSearchWhileTyping();
+  // handleGoBackToList();
   handleNameEdit();
   handleSaveNameEdit();
   handleCancelNameEdit();
