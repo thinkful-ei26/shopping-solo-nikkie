@@ -2,7 +2,9 @@
 /*eslint-env jquery, global cuid*/
 /*global cuid*/
 
-//STORE keeps the underlying data that our app will need to keep traxck of. Made up of objects with name and checked property (bool)
+//organize: put handling functions, then DOM manipulation functions, then helper functions 
+
+//STORE keeps the underlying data that our app will need to keep track of. Made up of objects with name and checked property (bool)
 //We're pre-adding items to the list so they're there when it loads (when finished, dont do that)
 
 //we need a data type to remember the other states of the page as well, such as whether or not the checkbox is clicked, etc. So we'll make an object 
@@ -31,11 +33,17 @@ function renderShoppingList(){
     //if there's a search term, filter the page to see that 
     filteredItems = filterBySearch(filteredItems);
   }
+  //call a fn that updates the output counter 
+  updateCounter(filteredItems);
   //  Call the function that generates a long string off all the items 
   const shoppingListItemsString = generateShoppingItemsString(filteredItems);
 
   //Insert this long string inside the ul html in the DOM 
   $('.js-shopping-list').html(shoppingListItemsString);
+}
+
+function updateCounter(filteredItems){
+  $('.js-list-count').html(`${filteredItems.length} items`);
 }
 
 //Filter by the search - if the search term is anywhere in the word, return it 
@@ -61,7 +69,6 @@ function filterListItems(filteredItems){
 function generateShoppingItemsString(storeItems) {
   console.log('in generateshoppingliststring');
   console.log(storeItems);
-  //PROBLEM: in storeItems it shows edit = true, but when i print item below it's showing edit=false....
   const items = storeItems.map((item) =>{ 
     console.log('in map');
     console.log(item);
@@ -74,7 +81,6 @@ function generateShoppingItemsString(storeItems) {
 function generateItemElement(item) {
   //see if it's in editing mode, and if it is then return a string with a form, with save and cancel
   console.log('in generateitemelemnt fn');
-  //PROBLEM: when this is called, edit is acting weird
   console.log(item);
   console.log(item.edit);
   console.log(item['name']);
@@ -189,6 +195,7 @@ function getItemIndex(uniqueID){
   return STORE.items.indexOf(getItem(uniqueID));
 }
 
+//returns a reference to the item in the global STORE
 function getItem(uniqueID){
   return STORE.items.find((item)=>item.id===uniqueID);
 }
